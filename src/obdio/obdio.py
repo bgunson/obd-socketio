@@ -4,16 +4,21 @@ import eventlet
 
 class OBDio(obd.Async):
     """
-    The OBDio class extends the obd.Async class. It does not have an __init__ method so that
-    arguments match up with obd.Async/OBD. Upon creation of an OBDio object a connection to 
-    the vehicle will be initiated but is not guarenteed (at least in my experience).
+        The OBDio class extends the obd.Async class. It does not have an __init__ method so that
+        arguments match up with obd.Async/OBD. Upon creation of an OBDio object a connection to 
+        the vehicle will be initiated but is not guarenteed (at least in my experience).
     """
-    def createServer(self, **kwargs):
+    def create_server(self, **kwargs):
+        """
+            Creates the python-socketio Server instance using same arguments and sets up some default 
+            events from the python-OBD API. 
+        """
         self.socket = socketio.Server(**kwargs)
         sio = self.socket
 
         @sio.event
         def connect(sid, environ, auth):
+            """ Reserved event """
             print("Client connected", sid)
 
         @sio.event
@@ -46,8 +51,7 @@ class OBDio(obd.Async):
 
         @sio.event
         def query(sid, cmd):
-            res = self.query(obd.commands[cmd])
-            self.sio.emit('obd_query', res, room=sid)
+            self.sio.emit('obd_query', self.query(obd.commands[cmd]), room=sid)
 
         @sio.event
         def start(sid):
@@ -66,10 +70,12 @@ class OBDio(obd.Async):
             self.start()
 
         @sio.event
-        def unwatch(sid, cmd):
+        def unwatch(sid, commands):
             self.stop()
-            self.unwatch(obd.commands[cmd])
-            self.stop()
+            commands = list(commands)
+            for cmd in commands:
+                self.unwatch(obd.commands[cmd])
+            self.start()
 
         @sio.event
         def unwatch_all(sid):
@@ -87,13 +93,16 @@ class OBDio(obd.Async):
         return sio
 
     def listen(self, port):
+        """ To start the server on some port at a later time so more events can be defined on top of whats already there. """
         app = socketio.WSGIApp(self.socket)
         eventlet.wsgi.server(eventlet.listen(('127.0.0.1', port)), app)
 
     def watch_callback(response):
+        """ Placeholder watch response callback. Should be reassigned with a custom implementation by the user of the module. """
         pass
 
-    def createEvent(self, name, handler):
+    def create_event(self, name, handler):
+        """ Create custom events by name and custom handler logic """
         sio = self.socket
         @sio.on(name)
         def custom_event(sid, data=None):
