@@ -84,36 +84,21 @@ io.listen(48484)
 ### Default Server Events
 On creation of an OBDio server most of the python-OBD API is exposed through events of the same name as its functions. The server will handle the event then respond with data (if any) using the same event name.
 
-+--------------------+-------------------+------------------------+
-| **Event**          | **Arguments**     | **Response Arguments** |
-+--------------------+-------------------+------------------------+
-| status             | None              | string connection      |
-+--------------------+-------------------+------------------------+
-| is_connected       | None              | boolean                |
-+--------------------+-------------------+------------------------+
-| protocol_name      | None              | string                 |
-+--------------------+-------------------+------------------------+
-| protocol_id        | None              | string                 |
-+--------------------+-------------------+------------------------+
-| port_name          | None              | string                 |
-+--------------------+-------------------+------------------------+
-| supports           | command (string)  | boolean                |
-+--------------------+-------------------+------------------------+
-| supported_commands | None              | object                 |
-+--------------------+-------------------+------------------------+
-| query              | command (string)  | null                   |
-+--------------------+-------------------+------------------------+
-| start              | None              | null                   |
-+--------------------+-------------------+------------------------+
-| watch              | command (string)  | null                   |
-+--------------------+-------------------+------------------------+
-| unwatch            | command (string)  | null                   |
-+--------------------+-------------------+------------------------+
-| unwatch_all        | None              | null                   |
-+--------------------+-------------------+------------------------+
-| has_name           | command (string)  | boolean                |
-+--------------------+-------------------+------------------------+
-| close              | None              | null                   |
-+--------------------+-------------------+------------------------+
+| **Event Name**     | **Argument Type**  | **Response Type** |
+|--------------------|--------------------|-------------------|
+| status             | None               | string            |
+| is_connected       | None               | boolean           |
+| protocol_name      | None               | string            |
+| protocol_id        | None               | string            |
+| port_name          | None               | string            |
+| supports           | string             | boolean           |
+| supported_commands | None               | object            |
+| query              | string             | null              |
+| start              | None               | null              |
+| watch              | string or string[] | null              |
+| unwatch            | string or string[] | null              |
+| unwatch_all        | None               | null              |
+| has_name           | string             | boolean           |
+| close              | None               | null              |
 
 See the python-OBD [documentation](https://python-obd.readthedocs.io/en/latest/) for expected behaviour of the default events.
