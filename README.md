@@ -2,7 +2,7 @@
 
 Quickly create a [python-socketio](https://pypi.org/project/python-socketio/) server with events corresponding to the [python-OBD](https://pypi.org/project/obd/) API. Ideal for controlling an Async connection to a vehicle from a JavaScript socketio client. The module provides default events which correspond to python-OBD methods as well as JSON encoding for its types.
 
-An example use case would be to use the server on a wireless hotspot enabled Raspberry Pi running and be able to interact with the connection from another device in a browser. You can use the default events which will behave as python-OBD does or build your own custom websocket/OBD2 API.
+An example use case would be to use the server on a wireless hotspot enabled Raspberry Pi and be able to interact with the connection from another device in a browser. You can use the default events which will behave as python-OBD does or build your own custom websocket/OBD2 API.
 
 ## Installation
 ```
@@ -41,9 +41,10 @@ sio.emit('event') # now you can use the socket
 The json parameter can be substituted for your own or the built-in (`import json`) module though it cannot serialize some of the obd types.
 
 ### listen(port)
-- `port` (number) - the port your server will listen on
+- `addr` (string) - the address to listen on
+- `port` (int) - the port your server will listen on
 
-Must be called after `create_server]`.
+Must be called after `create_server`.
 ```
 ...
 io.create_server()
@@ -58,7 +59,7 @@ Out of the box, when commands are watched they are all given the same callback `
 ```
 data = {}
 def cache_values(response):
-    data[resopnse.command] = response.value
+    data[response.command] = response.value
 
 io.watch_callback = cache_values
 ```
@@ -106,13 +107,13 @@ On creation of an OBDio server most of the python-OBD API is exposed through eve
 | port_name          | None                       | string            |
 | supports           | string<sup>1               | boolean           |
 | supported_commands | None                       | object            |
-| query<sup>2        | string<sup>1               | null              |
-| start              | None                       | null              |
-| watch              | (string or string[])<sup>1 | null              |
-| unwatch            | (string or string[])<sup>1 | null              |
-| unwatch_all        | None                       | null              |
+| query<sup>2        | string<sup>1               | N/A               |
+| start              | None                       | N/A               |
+| watch              | (string or string[])<sup>1 | N/A               |
+| unwatch            | (string or string[])<sup>1 | N/A               |
+| unwatch_all        | None                       | N/A               |
 | has_name           | string<sup>1               | boolean           |
-| close              | None                       | null              |
+| close              | None                       | N/A               |
 
 1. Arg is a string (or list of) OBD command by name i.e. 'RPM', 'SPEED'. See the OBD [Command Tables](https://python-obd.readthedocs.io/en/latest/Command%20Tables/).
 

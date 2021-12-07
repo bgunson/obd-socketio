@@ -50,6 +50,10 @@ class OBDio(obd.Async):
             sio.emit('supported_commands', self.supported_commands, room=sid)
 
         @sio.event
+        def all_commands(sid):      
+            sio.emit('all_commands', obd.commands, room=sid)
+
+        @sio.event
         def query(sid, cmd):
             self.sio.emit('obd_query', self.query(obd.commands[cmd]), room=sid)
 
@@ -92,10 +96,10 @@ class OBDio(obd.Async):
 
         return sio
 
-    def listen(self, port):
+    def listen(self, addr, port):
         """ To start the server on some port at a later time so more events can be defined on top of whats already there. """
         app = socketio.WSGIApp(self.socket)
-        eventlet.wsgi.server(eventlet.listen(('127.0.0.1', port)), app)
+        eventlet.wsgi.server(eventlet.listen((addr, port)), app)
 
     def watch_callback(response):
         """ Placeholder watch response callback. Should be reassigned with a custom implementation by the user of the module. """
