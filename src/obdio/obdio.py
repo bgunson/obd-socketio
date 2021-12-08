@@ -1,6 +1,6 @@
 import obd
 import socketio
-import eventlet
+import uvicorn
 
 class OBDio(obd.Async):
     """
@@ -13,60 +13,51 @@ class OBDio(obd.Async):
             Creates the python-socketio Server instance using same arguments and sets up some default 
             events from the python-OBD API. 
         """
-        self.socket = socketio.Server(**kwargs)
+        self.socket = socketio.AsyncServer(**kwargs, async_mode='asgi')
         sio = self.socket
 
         @sio.event
-        def connect(sid, environ, auth):
-            """ Reserved event """
-            print("Client connected", sid)
+        async def status(sid, data):
+            await sio.emit('status', self.status(), room=sid)
 
         @sio.event
-        def status(sid, data):
-            sio.emit('status', self.status(), room=sid)
+        async def is_connected(sid):
+            await sio.emit('is_connected', self.is_connected(), room=sid)
 
         @sio.event
-        def is_connected(sid):
-            sio.emit('is_connected', self.is_connected(), room=sid)
+        async def port_name(sid):
+            await sio.emit('port_name', self.port_name(), room=sid)
 
         @sio.event
-        def port_name(sid):
-            sio.emit('port_name', self.port_name(), room=sid)
+        async def supports(sid, cmd):
+            await sio.emit('supports', self.supports(obd.commands[cmd]), room=sid)
 
         @sio.event
-        def supports(sid, cmd):
-            sio.emit('supports', self.supports(obd.commands[cmd]), room=sid)
+        async def protocol_id(sid):
+            await sio.emit('protocol_id', self.protocol_id(), room=sid)
 
         @sio.event
-        def protocol_id(sid):
-            sio.emit('protocol_id', self.protocol_id(), room=sid)
+        async def protocol_name(sid):
+            await sio.emit('protocol_name', self.protocol_name(), room=sid)
 
         @sio.event
-        def protocol_name(sid):
-            sio.emit('protocol_name', self.protocol_name(), room=sid)
+        async def supported_commands(sid):
+            await sio.emit('supported_commands', self.supported_commands, room=sid)
 
         @sio.event
-        def supported_commands(sid):
-            sio.emit('supported_commands', self.supported_commands, room=sid)
+        async def query(sid, cmd):
+            await sio.emit('query', self.query(obd.commands[cmd]), room=sid)
 
         @sio.event
-        def all_commands(sid):      
-            sio.emit('all_commands', obd.commands, room=sid)
-
-        @sio.event
-        def query(sid, cmd):
-            self.sio.emit('obd_query', self.query(obd.commands[cmd]), room=sid)
-
-        @sio.event
-        def start(sid):
+        async def start(sid):
             self.start()
 
         @sio.event
-        def stop(sid, data):
+        async def stop(sid, data):
             self.stop()
 
         @sio.event
-        def watch(sid, commands):
+        async def watch(sid, commands):
             self.stop()
             commands = list(commands)
             for cmd in commands:
@@ -74,7 +65,7 @@ class OBDio(obd.Async):
             self.start()
 
         @sio.event
-        def unwatch(sid, commands):
+        async def unwatch(sid, commands):
             self.stop()
             commands = list(commands)
             for cmd in commands:
@@ -82,24 +73,19 @@ class OBDio(obd.Async):
             self.start()
 
         @sio.event
-        def unwatch_all(sid):
+        async def unwatch_all(sid):
             self.stop()
             self.unwatch_all()
 
         @sio.event
-        def has_name(sid, name):
-            sio.emit('has_name', obd.commands.has_name(name), room=sid)
+        async def has_name(sid, name):
+            await sio.emit('has_name', obd.commands.has_name(name), room=sid)
         
         @sio.event
-        def close(sid):
+        async def close(sid):
             self.close()
 
         return sio
-
-    def listen(self, addr, port):
-        """ To start the server on some port at a later time so more events can be defined on top of whats already there. """
-        app = socketio.WSGIApp(self.socket)
-        eventlet.wsgi.server(eventlet.listen((addr, port)), app)
 
     def watch_callback(response):
         """ Placeholder watch response callback. Should be reassigned with a custom implementation by the user of the module. """
@@ -109,5 +95,21 @@ class OBDio(obd.Async):
         """ Create custom events by name and custom handler logic """
         sio = self.socket
         @sio.on(name)
-        def custom_event(sid, data=None):
-            handler(sid, data)
+        async def custom_event(sid, data=None):
+            await handler(sid, data)
+
+    def serve_static(self, static_files):
+        """ To set your server's static content before running the server """
+        self.static_files = static_files
+
+    def run_server(self, **config):
+        """ To start the server on some host:port at a later time so more events can be defined on top of whats already there. """
+        
+        # Check for static content
+        if hasattr(self, 'static_files'):
+            static = self.static_files
+        else:
+            static = {}
+
+        app = socketio.ASGIApp(self.socket, static_files=static)
+        uvicorn.run(app, **config)
