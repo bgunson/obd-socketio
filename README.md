@@ -37,7 +37,7 @@ io.run_server()
     - [Default Server Events](#def-events)
 
 
-### <a name="obdio-class" /> OBDio class 
+## <a name="obdio-class" /> OBDio class 
 Initiaties the OBD connection to the vehicle. This class extends obd.Async (and therefore obd.OBD) so all aguments are the same, see [OBD connections](https://python-obd.readthedocs.io/en/latest/Connections/) for more args.
 ```
 import obdio
@@ -58,7 +58,7 @@ sio = io.create_server(cors_allowed_origins='*', json=obdio)    # use obdio as t
 ```
 The json parameter can be substituted for your own or the built-in (`import json`) module though it cannot serialize some of the obd types.
 
-### <a name="run-server"/> run_server(**config)
+## <a name="run-server"/> run_server(**config)
 Notable Parameters:
 - `host` (str) - Use '0.0.0.0' to be accessible on your LAN. 
 - `port` (int) - the port the server will listen on
@@ -69,7 +69,7 @@ io.create_server()
 io.run_server(host='0.0.0.0', port=48484)
 ```
 
-### <a name="serve-static"/> serve_static(files)
+## <a name="serve-static"/> serve_static(files)
 -  `files` (dict) - a list of static files to serve by route
 
 Confugure the socketio server to server static files, or a folder of static files. See python-socketio [server static files](https://python-socketio.readthedocs.io/en/latest/server.html#serving-static-files) for more info.
@@ -83,7 +83,7 @@ io.server_static({
 io.run_server()     # run the server after defining the static files
 ```
 
-### <a name="create-event"/> create_event(name, handler)
+## <a name="create-event"/> create_event(name, handler)
 - `name` (string) - the name of a custom or overriden event
 - `async handler(sid, data)` (function) - the custom event handler
 
@@ -108,7 +108,7 @@ async def watch(sid, cmd):
 io.run_server(48484)
 ```
 
-### <a name="watch-callback"/> watch_callback(response)
+## <a name="watch-callback"/> watch_callback(response)
 - `response` (obd.OBDResponse) - the obd value that triggered the callback
 
 Out of the box, when commands are watched they are all given the same callback `watch_callback` which does not implement anything. It is left for you to define so that data can be handled in your program uniquely. For example, for each response the value could be cached into a dictionary then that entire object streamed over the socket at a lesser rate than `watch_callback` may be fired.
@@ -121,7 +121,7 @@ def cache_values(response):
 io.watch_callback = cache_values
 ```
 
-### <a name="def-events"/> Default Server Events
+## <a name="def-events"/> Default Server Events
 On creation of an OBDio server most of the python-OBD API is exposed through events of the same name as its functions. The server will handle the event then respond with data (if any) using the same event name.
 
 | **Event Name**        | **Argument Type**          | **Response Type** |
