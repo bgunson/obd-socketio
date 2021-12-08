@@ -34,7 +34,7 @@ class OBDEncoder(json.JSONEncoder):
             return {
                 'name': o.name,
                 'desc': o.desc,
-                'fast': o.fast,
+                # 'fast': o.fast,
                 # the rest of this is not human readable/may not provide much info to a client
                 # 'command': str(o.command),    
                 # 'bytes': str(o.bytes),

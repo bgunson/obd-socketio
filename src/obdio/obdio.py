@@ -1,8 +1,6 @@
 import obd
 import socketio
-import eventlet
 import uvicorn
-import socket
 
 class OBDio(obd.Async):
     """
@@ -17,11 +15,6 @@ class OBDio(obd.Async):
         """
         self.socket = socketio.AsyncServer(**kwargs, async_mode='asgi')
         sio = self.socket
-
-        @sio.event
-        async def connect(sid, environ):
-            """ Reserved event """
-            print("Client connected", sid)
 
         @sio.event
         async def status(sid, data):
@@ -94,11 +87,6 @@ class OBDio(obd.Async):
 
         return sio
 
-    def run_server(self, addr, port):
-        """ To start the server on some port at a later time so more events can be defined on top of whats already there. """
-        app = socketio.ASGIApp(self.socket)
-        uvicorn.run(app, host=addr, port=port)
-
     def watch_callback(response):
         """ Placeholder watch response callback. Should be reassigned with a custom implementation by the user of the module. """
         pass
@@ -107,5 +95,21 @@ class OBDio(obd.Async):
         """ Create custom events by name and custom handler logic """
         sio = self.socket
         @sio.on(name)
-        def custom_event(sid, data=None):
-            handler(sid, data)
+        async def custom_event(sid, data=None):
+            await handler(sid, data)
+
+    def serve_static(self, static_files):
+        """ To set your server's static content before running the server """
+        self.static_files = static_files
+
+    def run_server(self, **config):
+        """ To start the server on some host:port at a later time so more events can be defined on top of whats already there. """
+        
+        # Check for static content
+        if hasattr(self, 'static_files'):
+            static = self.static_files
+        else:
+            static = {}
+
+        app = socketio.ASGIApp(self.socket, static_files=static)
+        uvicorn.run(app, **config)
