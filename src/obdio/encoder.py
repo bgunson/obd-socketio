@@ -1,5 +1,8 @@
 import json
 import obd
+from obd.OBDResponse import Status, Monitor
+from obd import Unit
+from obd.protocols.protocol import Message, Frame
 
 class OBDEncoder(json.JSONEncoder):
     """
@@ -9,11 +12,39 @@ class OBDEncoder(json.JSONEncoder):
     """
     def default(self, o):
 
-        if isinstance(o, obd.OBDStatus):
-            return "OBDStatus Not implemented"
+        if isinstance(o, Frame):
+            return {
+                'rx_id': o.rx_id,
+                'addr_mode': o.addr_mode,
+                'data': o.data,
+                'data_len': o.data_len,
+                'priority': o.priority,
+                'raw': o.raw,
+                'seq_index': o.seq_index,
+                'rx_id': o.rx_id,
+                'tx_id': o.tx_id,
+                'type': o.type
+            }
+
+        if isinstance(o, Message):
+            return {
+                'data': o.data,
+                'ecu': o.ecu,
+                'frames': o.frames
+            }
+
+        if isinstance(o, Status):
+            return {
+                'MIL': o.MIL,
+                'DTC_COUNT': o.DTC_count,
+                'ignition_type': o.ignition_type
+            }
+
+        if isinstance(o, Unit.Quantity):
+            return o.magnitude
 
         if isinstance(o, obd.ECU):  # this may not be needed
-            return str(o)   
+            return str(o)  
 
         if isinstance(o, set):
             return list(o)
@@ -23,20 +54,20 @@ class OBDEncoder(json.JSONEncoder):
                 return None
             else:
                 return {
-                    'value': o.value,       # pint values may break this
+                    'value': o.value,       
                     'command': o.command,
-                    'message': o.messages,
                     'time': o.time,
                     'unit': o.unit
                 }
+
                 
         if isinstance(o, obd.OBDCommand):
             return {
                 'name': o.name,
                 'desc': o.desc,
-                # 'fast': o.fast,
                 # the rest of this is not human readable/may not provide much info to a client
-                # 'command': str(o.command),    
+                # 'fast': o.fast,
+                # 'command': o.command,    
                 # 'bytes': str(o.bytes),
                 # 'ecu': o.ecu,
             }

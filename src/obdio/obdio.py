@@ -17,7 +17,7 @@ class OBDio(obd.Async):
         sio = self.socket
 
         @sio.event
-        async def status(sid, data):
+        async def status(sid):
             await sio.emit('status', self.status(), room=sid)
 
         @sio.event
@@ -87,7 +87,7 @@ class OBDio(obd.Async):
 
         return sio
 
-    def watch_callback(response):
+    async def watch_callback(self, response):
         """ Placeholder watch response callback. Should be reassigned with a custom implementation by the user of the module. """
         pass
 
@@ -109,7 +109,7 @@ class OBDio(obd.Async):
         if hasattr(self, 'static_files'):
             static = self.static_files
         else:
-            static = {}
+            static = None
 
         app = socketio.ASGIApp(self.socket, static_files=static)
         uvicorn.run(app, **config)
