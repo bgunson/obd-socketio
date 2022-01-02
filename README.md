@@ -124,7 +124,7 @@ async def custom_handler(sid, data):    # handlers must be async
 
 io.create_event('custom_event', custom_handler)
 
-io.run_server(port)     # lastly call run_server
+io.run_server(port=3000)     # lastly call run_server
 ```
 Or, you can use the [@sio.event](https://python-socketio.readthedocs.io/en/latest/server.html#defining-event-handlers) decorator allowing you to create events as you would with an ASGI server.
 
@@ -134,7 +134,7 @@ Or, you can use the [@sio.event](https://python-socketio.readthedocs.io/en/lates
 async def watch(sid, cmd):
     await sio.emit('event')     # emits must be awaited
 
-io.run_server(48484)
+io.run_server(port=48484)
 ```
 
 ### Default Server Events
@@ -151,13 +151,13 @@ On creation of an OBDio server most of the python-OBD API is exposed through eve
 | 'supported_commands'  | None                       | object            |
 | 'query' <sup>2        | string<sup>1               | N/A               |
 | 'start'               | None                       | N/A               |
-| 'watch'               | (string or string[])<sup>1 | N/A               |
-| 'unwatch'             | (string or string[])<sup>1 | N/A               |
+| 'watch'               | string[]<sup>1             | N/A               |
+| 'unwatch'             | string[]<sup>1             | N/A               |
 | 'unwatch_all'         | None                       | N/A               |
 | 'has_name'            | string<sup>1               | boolean           |
 | 'close'               | None                       | N/A               |
 
-1. Arg is a string (or list of) OBD command by name i.e. 'RPM', 'SPEED'. See the OBD [Command Tables](https://python-obd.readthedocs.io/en/latest/Command%20Tables/).
+1. Arg is a list of OBD commands by name i.e. 'RPM', 'SPEED'. See the OBD [Command Tables](https://python-obd.readthedocs.io/en/latest/Command%20Tables/).
 
 2. To query a command, it must be `watch`ed first
 
@@ -193,7 +193,7 @@ Example:
         "name": "RPM",
         "desc": "Engine RPM"
     },
-    "time": 1639266637.0963762,
+    "time": 1639266637000,  // epoch time in ms
     "unit": "revolutions_per_minute"
 }
 ```
@@ -220,5 +220,5 @@ Note the value is another object and unit describes the type of the response sin
 - [python-OBD](https://github.com/brendan-w/python-OBD)
 - [socket.io](https://github.com/socketio/socket.io)
 - [python-socketio](https://github.com/miguelgrinberg/python-socketio)
-- [ELM327-Simulator](https://github.com/Ircama/ELM327-emulator)
+- [ELM327-emulator](https://github.com/Ircama/ELM327-emulator)
 - [Uvicorn](https://github.com/encode/uvicorn)

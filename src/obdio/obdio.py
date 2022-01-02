@@ -59,7 +59,6 @@ class OBDio(obd.Async):
         @sio.event
         async def watch(sid, commands):
             self.stop()
-            commands = list(commands)
             for cmd in commands:
                 self.watch(obd.commands[cmd], self.watch_callback)
             self.start()
@@ -67,7 +66,6 @@ class OBDio(obd.Async):
         @sio.event
         async def unwatch(sid, commands):
             self.stop()
-            commands = list(commands)
             for cmd in commands:
                 self.unwatch(obd.commands[cmd])
             self.start()

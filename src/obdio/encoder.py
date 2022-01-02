@@ -1,6 +1,6 @@
 import json
 import obd
-from obd.OBDResponse import Status, Monitor
+from obd.OBDResponse import Monitor, Status, StatusTest, MonitorTest
 from obd import Unit
 from obd.protocols.protocol import Message, Frame
 
@@ -11,6 +11,23 @@ class OBDEncoder(json.JSONEncoder):
         Has not been tested on vehicle yet.
     """
     def default(self, o):
+
+        if isinstance(o, StatusTest):
+            return {
+                'available': o.available,
+                'complete': o.complete,
+                'name': o.name
+            }
+
+        if isinstance(o, MonitorTest):
+            return {
+                'tid': o.tid,
+                'name': o.name,
+                'desc': o.desc,
+                'value': o.value,
+                'min': o.min,
+                'max': o.max
+            }
 
         if isinstance(o, Frame):
             return {
@@ -56,7 +73,7 @@ class OBDEncoder(json.JSONEncoder):
                 return {
                     'value': o.value,       
                     'command': o.command,
-                    'time': o.time,
+                    'time': int(o.time * 1000),
                     'unit': o.unit
                 }
 
