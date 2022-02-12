@@ -2,12 +2,17 @@ import obd
 import socketio
 import uvicorn
 
-class OBDio(obd.Async):
-    """
-        The OBDio class extends the obd.Async class. It does not have an __init__ method so that
-        arguments match up with obd.Async/OBD. Upon creation of an OBDio object a connection to 
-        the vehicle will be initiated but is not guarenteed (at least in my experience).
-    """
+class OBDio():
+
+    connection = None
+
+    def connect_obd(self, *args, **kwargs):
+        """ Create an async connection to vehicle's OBD interface """
+        if self.connection is not None:
+            self.connection.close()     # Be sure the obd connection is closed 
+            del self.connection
+        self.connection = obd.Async(*args, **kwargs)
+    
     def create_server(self, **kwargs):
         """
             Creates the python-socketio Server instance using same arguments and sets up some default 
@@ -18,62 +23,62 @@ class OBDio(obd.Async):
 
         @sio.event
         async def status(sid):
-            await sio.emit('status', self.status(), room=sid)
+            await sio.emit('status', self.connection.status(), room=sid)
 
         @sio.event
         async def is_connected(sid):
-            await sio.emit('is_connected', self.is_connected(), room=sid)
+            await sio.emit('is_connected', self.connection.is_connected(), room=sid)
 
         @sio.event
         async def port_name(sid):
-            await sio.emit('port_name', self.port_name(), room=sid)
+            await sio.emit('port_name', self.connection.port_name(), room=sid)
 
         @sio.event
         async def supports(sid, cmd):
-            await sio.emit('supports', self.supports(obd.commands[cmd]), room=sid)
+            await sio.emit('supports', self.connection.supports(obd.commands[cmd]), room=sid)
 
         @sio.event
         async def protocol_id(sid):
-            await sio.emit('protocol_id', self.protocol_id(), room=sid)
+            await sio.emit('protocol_id', self.connection.protocol_id(), room=sid)
 
         @sio.event
         async def protocol_name(sid):
-            await sio.emit('protocol_name', self.protocol_name(), room=sid)
+            await sio.emit('protocol_name', self.connection.protocol_name(), room=sid)
 
         @sio.event
         async def supported_commands(sid):
-            await sio.emit('supported_commands', self.supported_commands, room=sid)
+            await sio.emit('supported_commands', self.connection.supported_commands, room=sid)
 
         @sio.event
         async def query(sid, cmd):
-            await sio.emit('query', self.query(obd.commands[cmd]), room=sid)
+            await sio.emit('query', self.connection.query(obd.commands[cmd]), room=sid)
 
         @sio.event
         async def start(sid):
-            self.start()
+            self.connection.start()
 
         @sio.event
         async def stop(sid, data):
-            self.stop()
+            self.connection.stop()
 
         @sio.event
         async def watch(sid, commands):
-            self.stop()
+            self.connection.stop()
             for cmd in commands:
-                self.watch(obd.commands[cmd], self.watch_callback)
-            self.start()
+                self.connection.watch(obd.commands[cmd], self.connection.watch_callback)
+            self.connection.start()
 
         @sio.event
         async def unwatch(sid, commands):
-            self.stop()
+            self.connection.stop()
             for cmd in commands:
-                self.unwatch(obd.commands[cmd])
-            self.start()
+                self.connection.unwatch(obd.commands[cmd])
+            self.connection.start()
 
         @sio.event
         async def unwatch_all(sid):
-            self.stop()
-            self.unwatch_all()
+            self.connection.stop()
+            self.connection.unwatch_all()
 
         @sio.event
         async def has_name(sid, name):
@@ -81,7 +86,8 @@ class OBDio(obd.Async):
         
         @sio.event
         async def close(sid):
-            self.close()
+            self.connection.close()
+            await sio.emit('obd_closed')
 
         return sio
 

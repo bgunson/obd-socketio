@@ -13,8 +13,10 @@ pip install obd-socketio
 ```
 import obdio
 
-# Initiate connection to the vehicle
 io = obdio.OBDio()
+
+# Initiate connection to the vehicle
+io.connect_obd()
 
 # Create the server socket
 io.create_server()  
@@ -38,12 +40,16 @@ io.run_server()
 
 ## Connecting to the Vehicle
 
-The OBDIO class iniates the OBD connection to the vehicle. This class extends obd.Async (and therefore obd.OBD) so all aguments are the same, see [OBD connections](https://python-obd.readthedocs.io/en/latest/Connections/) for more arguments.
+Use `connect_obd()` to initiate the serial connection with the vehicle. `connect_obd()` can be called at anytime during the server's life and can also be used in the body of an event handler.
+
 ```
 import obdio
 
-io = obdio.OBDio('/dev/ttyUSB0')    # connect to specific serial port
+io = obdio.OBDio()    
+
+io.connect_obd('/dev/ttyUSB0')    # connect to specific serial port
 ``` 
+See [OBD connections](https://python-obd.readthedocs.io/en/latest/Connections/) for further usage.
 
 ## Configuring the Server
 
@@ -99,7 +105,7 @@ Your custom watch callback will be passed an OBDResponse. If you use `obdio` as 
 ```
 data = {}
 def cache_values(response):
-    data[response.command] = response 
+    data[response.command.name] = response 
 
 io.watch_callback = cache_values
 ```
@@ -129,9 +135,12 @@ io.run_server(port=3000)     # lastly call run_server
 Or, you can use the [@sio.event](https://python-socketio.readthedocs.io/en/latest/server.html#defining-event-handlers) decorator allowing you to create events as you would with an ASGI server.
 
 ```
+import obd
 
+""" Override the default watch event """
 @sio.event
 async def watch(sid, cmd):
+    io.connection.watch(obd.commands[cmd])    # access python-OBD connection and methods
     await sio.emit('event')     # emits must be awaited
 
 io.run_server(port=48484)
@@ -155,7 +164,7 @@ On creation of an OBDio server most of the python-OBD API is exposed through eve
 | 'unwatch'             | string[]<sup>1             | N/A               |
 | 'unwatch_all'         | None                       | N/A               |
 | 'has_name'            | string<sup>1               | boolean           |
-| 'close'               | None                       | N/A               |
+| 'close'               | None                       | null              |
 
 1. Arg is a list of OBD commands by name i.e. 'RPM', 'SPEED'. See the OBD [Command Tables](https://python-obd.readthedocs.io/en/latest/Command%20Tables/).
 
@@ -209,7 +218,7 @@ OBDResponse - Status Example:
         "name": "STATUS",
         "desc": "Status since DTCs cleared"
     },
-    "time": 1639341509.038382,
+    "time": 1639341509038,
     "unit": "<class 'obd.OBDResponse.Status'>"
 }
 ```
