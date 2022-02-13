@@ -1,10 +1,9 @@
+from inspect import isclass
 import json
 import obd
-from obd.OBDResponse import Monitor, Status, StatusTest, MonitorTest
+from obd.OBDResponse import Status, StatusTest, MonitorTest
 from obd import Unit
 from obd.protocols.protocol import Message, Frame, Protocol
-
-from obd.protocols.protocol_legacy import LegacyProtocol
 
 class OBDEncoder(json.JSONEncoder):
     """
@@ -13,8 +12,8 @@ class OBDEncoder(json.JSONEncoder):
         Has not been tested on vehicle yet.
     """
     def default(self, o):
-
-        if issubclass(o.__base__, obd.protocols.protocol.Protocol):
+        
+        if isclass(o) and issubclass(o, Protocol):
             return {
                 'id': o.ELM_ID,
                 'name': o.ELM_NAME
