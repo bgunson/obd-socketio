@@ -89,11 +89,10 @@ class OBDEncoder(json.JSONEncoder):
             return {
                 'name': o.name,
                 'desc': o.desc,
-                # the rest of this is not human readable/may not provide much info to a client
-                # 'fast': o.fast,
-                # 'command': o.command,    
-                # 'bytes': str(o.bytes),
-                # 'ecu': o.ecu,
+                'fast': o.fast,
+                'command': o.command,    
+                'bytes': str(o.bytes),
+                'ecu': o.ecu,
             }
 
         try:
