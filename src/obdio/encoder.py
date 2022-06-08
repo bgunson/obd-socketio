@@ -90,7 +90,7 @@ class OBDEncoder(json.JSONEncoder):
                 'name': o.name,
                 'desc': o.desc,
                 'fast': o.fast,
-                'command': o.command,    
+                'command': o.command.decode(),    
                 'bytes': str(o.bytes),
                 'ecu': o.ecu,
             }
