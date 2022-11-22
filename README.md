@@ -1,5 +1,9 @@
 # obd-socketio
 
+[![Downloads](https://pepy.tech/badge/obd-socketio)](https://pepy.tech/project/obd-socketio)
+[![Downloads](https://pepy.tech/badge/obd-socketio/month)](https://pepy.tech/project/obd-socketio)
+[![Downloads](https://pepy.tech/badge/obd-socketio/week)](https://pepy.tech/project/obd-socketio)
+
 Quickly create a [python-socketio](https://github.com/miguelgrinberg/python-socketio) server with events corresponding to the [python-OBD](https://github.com/brendan-w/python-OBD) API. Ideal for controlling an Async connection to a vehicle from a JavaScript socketio client. The module provides default events which correspond to python-OBD methods as well as JSON encoding for its types.
 
 An example use case would be to use the server on a wireless hotspot enabled Raspberry Pi and be able to interact with the connection from another device in a browser. You can use the default events which will behave as python-OBD does or build your own custom websocket/OBD2 API.
